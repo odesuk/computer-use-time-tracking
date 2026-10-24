@@ -7,10 +7,10 @@ public sealed class CommandLineOptionsTests
     [Fact]
     public void KnownSwitches_AreParsed_AndOthersPassThrough()
     {
-        CommandLineOptions options = CommandLineOptions.Parse(new[] { "--SETUP", "/mcp", "--login", "--environment", "Development" });
+        CommandLineOptions options = CommandLineOptions.Parse(new[] { "--SETUP", "--future-option", "/unknown", "--environment", "Development" });
 
         Assert.True(options.Setup);
-        Assert.Equal(new[] { "/mcp", "--login", "--environment", "Development" }, options.HostArgs);
+        Assert.Equal(new[] { "--future-option", "/unknown", "--environment", "Development" }, options.HostArgs);
     }
 
     [Fact]

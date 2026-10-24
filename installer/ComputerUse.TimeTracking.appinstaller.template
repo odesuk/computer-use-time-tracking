@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AppInstaller
+  Uri="https://REPLACE_WITH_HTTPS_FEED/ComputerUse.TimeTracking.appinstaller"
+  Version="1.0.0.0"
+  xmlns="http://schemas.microsoft.com/appx/appinstaller/2018">
+  <MainPackage
+	Name="ComputerUse.TimeTracking"
+	Publisher="CN=REPLACE_WITH_SIGNING_CERT_SUBJECT"
+	Version="1.0.0.0"
+	ProcessorArchitecture="x64"
+	Uri="https://REPLACE_WITH_HTTPS_FEED/ComputerUse.TimeTracking.msix" />
+  <UpdateSettings>
+	<OnLaunch HoursBetweenUpdateChecks="0" ShowPrompt="false" UpdateBlocksActivation="true" />
+	<AutomaticBackgroundTask />
+  </UpdateSettings>
+</AppInstaller>

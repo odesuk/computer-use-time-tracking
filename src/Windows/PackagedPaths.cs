@@ -1,4 +1,5 @@
 using System.IO;
+using System.Runtime.InteropServices;
 namespace ComputerUse.TimeTracking;
 
 /// <summary>
@@ -36,14 +37,10 @@ internal static class PackagedPaths
 
     private static bool DetectPackaged()
     {
-        try
-        {
-            return global::Windows.ApplicationModel.Package.Current is not null;
-        }
-        catch (Exception)
-        {
-            // InvalidOperationException (or a COMException) when running without package identity.
-            return false;
-        }
+        uint length = 0;
+        return GetCurrentPackageFullName(ref length, IntPtr.Zero) == 122; // ERROR_INSUFFICIENT_BUFFER means a package identity exists.
     }
+
+    [DllImport("kernel32.dll", CharSet = CharSet.Unicode)]
+    private static extern int GetCurrentPackageFullName(ref uint packageFullNameLength, IntPtr packageFullName);
 }

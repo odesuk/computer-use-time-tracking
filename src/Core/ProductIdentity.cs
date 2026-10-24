@@ -23,7 +23,8 @@ public sealed record ProductIdentity(
         "ComputerUse.TimeTracking",
         "ComputerUseTimeTracking",
         "ComputerUse.TimeTracking",
-        "Activity stays on this computer and is never sent to a cloud service.");
+        "Activity stays on this computer and is never sent to a cloud service.",
+        ActiveIconResourceName: "ComputerUse.TimeTracking.AppIcon.ico");
 
     public void Validate()
     {

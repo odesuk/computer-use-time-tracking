@@ -9,6 +9,7 @@
     <UseWindowsForms>true</UseWindowsForms>
     <RootNamespace>ComputerUse.TimeTracking</RootNamespace>
     <AssemblyName>ComputerUse.TimeTracking</AssemblyName>
+    <ApplicationIcon>..\..\installer\Assets\AppIcon.ico</ApplicationIcon>
     <Version>1.0.0</Version>
     <Product>Computer Use Time Tracker</Product>
     <Company>Computer Use Time Tracking contributors</Company>
@@ -17,6 +18,7 @@
   <ItemGroup>
     <Using Remove="System.Windows.Forms" />
     <Using Remove="System.Drawing" />
+    <EmbeddedResource Include="..\..\installer\Assets\AppIcon.ico" LogicalName="ComputerUse.TimeTracking.AppIcon.ico" />
   </ItemGroup>
 
   <ItemGroup>

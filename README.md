@@ -18,6 +18,18 @@ dotnet test tests/Core.Tests/ComputerUse.TimeTracking.Core.Tests.csproj
 dotnet test tests/Windows.Tests/ComputerUse.TimeTracking.Windows.Tests.csproj
 ```
 
+Launch the development build from the repository root:
+
+```powershell
+dotnet run --project src\Windows\ComputerUse.TimeTracking.Windows.csproj
+```
+
+The app runs in the notification area and does not open a main window. If the tray icon is not visible, check Windows' hidden-icons menu. To reopen setup/settings explicitly:
+
+```powershell
+dotnet run --project src\Windows\ComputerUse.TimeTracking.Windows.csproj -- --setup
+```
+
 The public app uses separate product identities for local storage, reports, startup registration, and single-instance synchronization:
 
 - data: `%LOCALAPPDATA%\ComputerUse-TimeTracking`

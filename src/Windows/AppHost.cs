@@ -18,7 +18,7 @@ public static class AppHost
     public static IHost Build(
         string[] hostArgs,
         SettingsService settings,
-        Action<HostBuilderContext, IServiceCollection>? configureServices = null)
+        Action<HostBuilderContext, IServiceCollection, SettingsService>? configureServices = null)
     {
         return Host.CreateDefaultBuilder(hostArgs)
             // A startup task launches with System32 as the working directory; read appsettings.json
@@ -57,7 +57,7 @@ public static class AppHost
                 services.AddSingleton<ReportCoordinator>();
                 services.AddSingleton<RetentionService>();
                 services.AddHostedService<ReportScheduler>();
-                configureServices?.Invoke(context, services);
+                configureServices?.Invoke(context, services, settings);
             })
             .Build();
     }

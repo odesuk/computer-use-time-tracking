@@ -34,7 +34,7 @@ public static class TrackerApplication
     public static int Run(
         string[] args,
         ProductIdentity identity,
-        Action<HostBuilderContext, IServiceCollection>? configureServices = null)
+        Action<HostBuilderContext, IServiceCollection, SettingsService>? configureServices = null)
     {
         ProductContext.Configure(identity);
         CommandLineOptions options = CommandLineOptions.Parse(args);
@@ -90,7 +90,7 @@ public static class TrackerApplication
     private static int RunTracker(
         CommandLineOptions options,
         SingleInstanceGuard instance,
-        Action<HostBuilderContext, IServiceCollection>? configureServices,
+        Action<HostBuilderContext, IServiceCollection, SettingsService>? configureServices,
         out string? resetPdfReportDirectory)
     {
         resetPdfReportDirectory = null;

@@ -144,7 +144,7 @@ internal sealed class TrayIcon : IDisposable
     private void ResetLocalData()
     {
         WinForms.DialogResult result = WinForms.MessageBox.Show(
-            $"This permanently deletes {ProductContext.Current.ShortName} tracking data, settings, pending data, JSON reports, and logs. " +
+            $"This permanently deletes {ProductContext.Current.ShortName} tracking data, settings, pending data, CSV and JSON reports, and logs. " +
             $"It also deletes {ProductContext.Current.ReportFilePrefix} PDF reports in the configured report folder.\n\n" +
             "The application will close and must be launched again to complete setup.\n\nContinue?",
             ProductContext.Current.DisplayName,

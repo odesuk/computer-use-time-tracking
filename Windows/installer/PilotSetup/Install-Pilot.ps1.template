@@ -1,0 +1,48 @@
+[CmdletBinding()]
+param()
+
+$ErrorActionPreference = 'Stop'
+Set-StrictMode -Version Latest
+
+$expectedMsixName = '__MSIX_NAME__'
+$expectedMsixSha256 = '__MSIX_SHA256__'
+$expectedCertificateSha256 = '__CERT_SHA256__'
+$expectedThumbprint = '__CERT_THUMBPRINT__'
+$expectedSubject = '__CERT_SUBJECT__'
+$msixPath = Join-Path $PSScriptRoot $expectedMsixName
+$certificatePath = Join-Path $PSScriptRoot 'ComputerUse.TimeTracking_LocalPublisher.cer'
+
+$principal = [Security.Principal.WindowsPrincipal]::new([Security.Principal.WindowsIdentity]::GetCurrent())
+if (-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)) {
+    throw 'Administrator approval is required to trust the pilot publisher certificate.'
+}
+
+foreach ($path in @($msixPath, $certificatePath)) {
+    if (-not (Test-Path -LiteralPath $path -PathType Leaf)) { throw "Required setup payload missing: $([IO.Path]::GetFileName($path))" }
+}
+if ((Get-FileHash -LiteralPath $msixPath -Algorithm SHA256).Hash -ne $expectedMsixSha256) { throw 'The bundled MSIX failed its integrity check.' }
+if ((Get-FileHash -LiteralPath $certificatePath -Algorithm SHA256).Hash -ne $expectedCertificateSha256) { throw 'The bundled publisher certificate failed its integrity check.' }
+
+$certificate = [Security.Cryptography.X509Certificates.X509Certificate2]::new($certificatePath)
+if ($certificate.HasPrivateKey -or $certificate.Thumbprint -ne $expectedThumbprint -or $certificate.Subject -ne $expectedSubject) {
+    throw 'The bundled publisher certificate does not match the expected pilot certificate.'
+}
+if ((Get-Date) -lt $certificate.NotBefore -or (Get-Date) -gt $certificate.NotAfter) { throw 'The pilot publisher certificate is not currently valid.' }
+
+$signature = Get-AuthenticodeSignature -LiteralPath $msixPath
+if (-not $signature.SignerCertificate -or $signature.SignerCertificate.Thumbprint -ne $expectedThumbprint -or $signature.SignerCertificate.Subject -ne $expectedSubject -or $signature.Status -in @('HashMismatch', 'NotSigned', 'NotSupported')) {
+    throw "The bundled MSIX is not signed by the expected publisher: $($signature.Status)"
+}
+
+$trustedCertificatePath = "Cert:\LocalMachine\TrustedPeople\$expectedThumbprint"
+if (-not (Test-Path -LiteralPath $trustedCertificatePath)) {
+    Import-Certificate -FilePath $certificatePath -CertStoreLocation 'Cert:\LocalMachine\TrustedPeople' | Out-Null
+}
+
+$trustedSignature = Get-AuthenticodeSignature -LiteralPath $msixPath
+if ($trustedSignature.Status -ne 'Valid' -or -not $trustedSignature.SignerCertificate -or $trustedSignature.SignerCertificate.Thumbprint -ne $expectedThumbprint) {
+    throw 'Trusting the publisher certificate did not validate the bundled MSIX.'
+}
+
+Add-AppxPackage -Path $msixPath
+Write-Host 'Computer Use Time Tracking installed.' -ForegroundColor Green

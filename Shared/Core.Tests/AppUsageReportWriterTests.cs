@@ -2,6 +2,7 @@ using System.Text;
 using System.Text.Json;
 using ComputerUse.TimeTracking.Reports;
 using ComputerUse.TimeTracking.Services;
+using ComputerUse.TimeTracking.Storage;
 using Microsoft.Extensions.Logging.Abstractions;
 using Xunit;
 
@@ -45,7 +46,46 @@ public sealed class AppUsageReportWriterTests : IDisposable
         Assert.Equal("2026-10-20", json.RootElement.GetProperty("date").GetString());
         Assert.False(json.RootElement.GetProperty("isFinal").GetBoolean());
         Assert.Equal(60, json.RootElement.GetProperty("appCount").GetInt32());
+        string csv = await File.ReadAllTextAsync(Path.Combine(_workspace.JsonDirectory, "2026-10-20.csv"));
+        Assert.StartsWith("Date,ProcessName,DisplayName,Title,Seconds,FirstSeenUtc,LastSeenUtc,ItemCount", csv);
+        Assert.Contains("app00", csv);
     }
+
+    [Fact]
+    public async Task DetailedCsv_ExcludesConfiguredAndLockScreenProcesses()
+    {
+        DateTime start = new(2026, 10, 20, 12, 0, 0, DateTimeKind.Utc);
+        _workspace.Repository.SaveTimeBlock(TestBlocks.Block(start, TimeSpan.FromMinutes(5), "WINWORD", "Brief"));
+        _workspace.Repository.SaveTimeBlock(TestBlocks.Block(start.AddMinutes(6), TimeSpan.FromMinutes(5), "WhatsApp", "Personal"));
+        _workspace.Repository.SaveTimeBlock(TestBlocks.Block(start.AddMinutes(12), TimeSpan.FromMinutes(5), "LockApp", "Lock screen"));
+
+        SettingsService settings = _workspace.CreateSettings(s => s.ExcludedProcessNames = new List<string> { "WhatsApp" });
+        await CreateWriter(settings).WriteAsync(new DateOnly(2026, 10, 20), false, _clock.GetLocalNow(), CancellationToken.None);
+
+        string csv = await File.ReadAllTextAsync(Path.Combine(_workspace.JsonDirectory, "2026-10-20.csv"));
+        Assert.Contains("WINWORD", csv);
+        Assert.DoesNotContain("WhatsApp", csv);
+        Assert.DoesNotContain("LockApp", csv);
+    }
+
+    [Fact]
+    public void DetailedCsv_PrefixesSpreadsheetFormulas()
+    {
+        string csv = AppUsageReportWriter.BuildCsv(new DateOnly(2026, 10, 20), new[]
+        {
+            new AppTitleUsageRow("excel", "Excel", "=1+1", 60,
+                new DateTime(2026, 10, 20, 12, 0, 0, DateTimeKind.Utc),
+                new DateTime(2026, 10, 20, 12, 1, 0, DateTimeKind.Utc), 1),
+        });
+        Assert.Contains(",'=1+1,", csv);
+    }
+
+    [Theory]
+    [InlineData("2026-10-20.csv")]
+    [InlineData("2026-10-20.csv.tmp")]
+    [InlineData("2026-10-20.json")]
+    public void Retention_RecognizesGeneratedReportSidecars(string name) =>
+        Assert.True(RetentionService.IsGeneratedSidecarName(name));
 
     [Fact]
     public async Task EmptyDay_AndTitlesOff_StillRender()
@@ -93,14 +133,15 @@ public sealed class AppUsageReportWriterTests : IDisposable
     {
         var runs = new ReportRunRepository(_workspace.DatabasePath);
         DateTime now = _clock.GetUtcNow().UtcDateTime;
-        _workspace.Repository.SaveTimeBlock(TestBlocks.Block(now.AddDays(-40), TimeSpan.FromMinutes(5), "WINWORD", "Old"));
+        DateTime expired = now.AddDays(-(ClientSetupSettings.RawActivityRetentionLimitDays + 1));
+        _workspace.Repository.SaveTimeBlock(TestBlocks.Block(expired, TimeSpan.FromMinutes(5), "WINWORD", "Old"));
         _workspace.Repository.SaveTimeBlock(TestBlocks.Block(now.AddDays(-2), TimeSpan.FromMinutes(5), "WINWORD", "Recent"));
-        runs.Record(DateOnly.FromDateTime(now.AddDays(-40)), ReportTrigger.CatchUp, _clock.GetLocalNow(), true, "old.pdf");
+        runs.Record(DateOnly.FromDateTime(expired), ReportTrigger.CatchUp, new DateTimeOffset(expired), true, "old.pdf");
 
         int purged = new RetentionService(_workspace.Repository, runs, _clock).Purge();
 
         Assert.Equal(1, purged);
-        Assert.False(runs.HasFinal(DateOnly.FromDateTime(now.AddDays(-40))));
+        Assert.False(runs.HasFinal(DateOnly.FromDateTime(expired)));
         Assert.True(_workspace.Repository.HasActivity(now.AddDays(-3), now));
     }
 

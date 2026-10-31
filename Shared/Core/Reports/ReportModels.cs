@@ -24,7 +24,7 @@ public enum ReportTrigger
 /// <param name="IsFinal">True when written after the day ended; the report will not change.</param>
 public sealed record ReportResult(DateOnly Date, string PdfPath, bool IsFinal, ReportTrigger Trigger);
 
-/// <summary>One day's active time by application: the model behind the PDF and the JSON sidecar.</summary>
+/// <summary>One day's active time by application: the model behind the PDF and report sidecars.</summary>
 public sealed record DailyAppUsageReport(
     DateOnly Date,
     string TimeZoneId,

@@ -9,7 +9,7 @@ namespace ComputerUse.TimeTracking.Reports;
 
 public sealed class RetentionService
 {
-    private static readonly Regex GeneratedJsonName = new(@"^\d{4}-\d{2}-\d{2}\.json(?:\.tmp)?$", RegexOptions.CultureInvariant);
+    private static readonly Regex GeneratedSidecarName = new(@"^\d{4}-\d{2}-\d{2}\.(?:json|csv)(?:\.tmp)?$", RegexOptions.CultureInvariant);
     private readonly TimeRepository _repository;
     private readonly ReportRunRepository _runs;
     private readonly TimeProvider _timeProvider;
@@ -27,15 +27,15 @@ public sealed class RetentionService
     {
         DateTime now = _timeProvider.GetUtcNow().UtcDateTime;
         var failures = new List<Exception>();
-        int json = Try(() => PurgeJsonBefore(now.AddDays(-ClientSetupSettings.GeneratedJsonRetentionDays)), failures, "generated JSON sidecars");
+        int sidecars = Try(() => PurgeSidecarsBefore(now.AddDays(-ClientSetupSettings.GeneratedJsonRetentionDays)), failures, "generated report sidecars");
         int blocks = Try(() => _repository.PurgeRawActivityBefore(now.AddDays(-ClientSetupSettings.RawActivityRetentionLimitDays)), failures, "raw activity");
         int runs = Try(() => _runs.PurgeBefore(now.AddDays(-ClientSetupSettings.RawActivityRetentionLimitDays)), failures, "report runs");
         if (failures.Count > 0) throw new AggregateException("One or more retention targets could not be cleaned.", failures);
-        if (blocks > 0 || runs > 0 || json > 0) _logger.LogInformation("Retention removed {Blocks} activity blocks, {Runs} report records, and {Json} JSON sidecars.", blocks, runs, json);
+        if (blocks > 0 || runs > 0 || sidecars > 0) _logger.LogInformation("Retention removed {Blocks} activity blocks, {Runs} report records, and {Sidecars} report sidecars.", blocks, runs, sidecars);
         return blocks;
     }
 
-    private int PurgeJsonBefore(DateTime cutoffUtc)
+    private int PurgeSidecarsBefore(DateTime cutoffUtc)
     {
         if (!Directory.Exists(AppPaths.JsonReports)) return 0;
         int deleted = 0;
@@ -43,13 +43,17 @@ public sealed class RetentionService
         foreach (string path in Directory.EnumerateFiles(AppPaths.JsonReports, "*", SearchOption.TopDirectoryOnly))
         {
             string name = Path.GetFileName(path);
-            if (!GeneratedJsonName.IsMatch(name) || !DateOnly.TryParseExact(name[..10], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _)) continue;
+            if (!IsGeneratedSidecarName(name)) continue;
             try { if (File.GetLastWriteTimeUtc(path) < cutoffUtc) { File.Delete(path); deleted++; } }
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { _logger.LogError(ex, "Retention cleanup could not inspect or delete JSON sidecar {Path}.", path); failures.Add(ex); }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { _logger.LogError(ex, "Retention cleanup could not inspect or delete report sidecar {Path}.", path); failures.Add(ex); }
         }
-        if (failures.Count > 0) throw new AggregateException("One or more JSON sidecars could not be deleted.", failures);
+        if (failures.Count > 0) throw new AggregateException("One or more report sidecars could not be deleted.", failures);
         return deleted;
     }
+
+    internal static bool IsGeneratedSidecarName(string name) =>
+        GeneratedSidecarName.IsMatch(name) &&
+        DateOnly.TryParseExact(name[..10], "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out _);
 
     private int Try(Func<int> action, ICollection<Exception> failures, string target)
     {

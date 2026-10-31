@@ -69,7 +69,7 @@ internal sealed class TrayIcon : IDisposable
         menu.Items.Add(_pauseMenu);
         menu.Items.Add(_resumeItem);
         menu.Items.Add("Settings…", null, (_, _) => ShowSettings());
-        menu.Items.Add("View logs", null, (_, _) => Try(() => Shell.OpenFolder(PackagedPaths.Logs)));
+        menu.Items.Add("View logs", null, (_, _) => Try(() => Shell.OpenFolder(_settings.Current.EffectivePdfReportDirectory)));
         menu.Items.Add(new WinForms.ToolStripSeparator());
         menu.Items.Add("Reset local data…", null, (_, _) => ResetLocalData());
         menu.Items.Add("Exit", null, (_, _) => _app.Shutdown());

@@ -24,7 +24,7 @@ public static class AppHost
             // A startup task launches with System32 as the working directory; read appsettings.json
             // from the app folder instead.
             .UseContentRoot(AppContext.BaseDirectory)
-            .UseSerilog((_, logger) => ConfigureLogging(logger))
+            .UseSerilog((_, logger) => ConfigureLogging(logger, settings.Current.EffectivePdfReportDirectory))
             .ConfigureServices((context, services) =>
             {
                 services.AddSingleton(settings);
@@ -63,15 +63,15 @@ public static class AppHost
     }
 
     /// <summary>
-    /// Daily rolling file under the product's local data directory. Nothing in the app logs window
+    /// Daily rolling file beside the PDF reports. Nothing in the app logs window
     /// titles, email subjects, senders or recipients above Debug, and Debug is not written.
     /// </summary>
-    public static void ConfigureLogging(LoggerConfiguration logger) => logger
+    public static void ConfigureLogging(LoggerConfiguration logger, string reportDirectory) => logger
         .MinimumLevel.Information()
         .MinimumLevel.Override("Microsoft", LogEventLevel.Warning)
         .MinimumLevel.Override("Microsoft.Hosting.Lifetime", LogEventLevel.Information)
         .MinimumLevel.Override("System.Net.Http.HttpClient", LogEventLevel.Warning)
-        .WriteTo.File(Path.Combine(AppPaths.Logs, "tracker-.log"),
+        .WriteTo.File(Path.Combine(reportDirectory, "tracker-.log"),
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 14,
             fileSizeLimitBytes: 10_000_000,

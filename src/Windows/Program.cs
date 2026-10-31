@@ -48,7 +48,8 @@ public static class TrackerApplication
             return 0;
         }
 
-        Log.Logger = CreateBootstrapLogger();
+        var settings = new SettingsService(new ClientConfigurationStore());
+        Log.Logger = CreateBootstrapLogger(settings);
         AppDomain.CurrentDomain.UnhandledException += (_, e) =>
             Log.Fatal(e.ExceptionObject as Exception, "Unhandled exception; the tracker is stopping.");
         TaskScheduler.UnobservedTaskException += (_, e) =>
@@ -59,7 +60,7 @@ public static class TrackerApplication
 
         try
         {
-            int exitCode = RunTracker(options, instance, configureServices, out string? resetPdfReportDirectory);
+            int exitCode = RunTracker(options, instance, settings, configureServices, out string? resetPdfReportDirectory);
             if (exitCode != 0 || resetPdfReportDirectory is null) return exitCode;
 
             Log.CloseAndFlush();
@@ -90,6 +91,7 @@ public static class TrackerApplication
     private static int RunTracker(
         CommandLineOptions options,
         SingleInstanceGuard instance,
+        SettingsService settings,
         Action<HostBuilderContext, IServiceCollection, SettingsService>? configureServices,
         out string? resetPdfReportDirectory)
     {
@@ -102,7 +104,6 @@ public static class TrackerApplication
             e.Handled = true;
         };
 
-        var settings = new SettingsService(new ClientConfigurationStore());
         ClientSetupSettings current = settings.Current;
         if (options.Setup || !current.SetupCompleted)
         {
@@ -205,10 +206,10 @@ public static class TrackerApplication
             DatabaseInitializer.GetSchemaVersion());
     }
 
-    private static Serilog.ILogger CreateBootstrapLogger()
+    private static Serilog.ILogger CreateBootstrapLogger(SettingsService settings)
     {
         var configuration = new LoggerConfiguration();
-        AppHost.ConfigureLogging(configuration);
+        AppHost.ConfigureLogging(configuration, settings.Current.EffectivePdfReportDirectory);
         return configuration.CreateLogger();
     }
 

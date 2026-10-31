@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text;
 using System.Text.Json;
 using ComputerUse.TimeTracking.Services;
+using ComputerUse.TimeTracking.Storage;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Logging.Abstractions;
 
@@ -9,11 +10,11 @@ namespace ComputerUse.TimeTracking.Reports;
 
 public interface IDailyReportWriter
 {
-    /// <summary>Writes the day's PDF (and JSON sidecar) and returns the PDF path actually written.</summary>
+    /// <summary>Writes the day's PDF plus CSV and JSON sidecars, and returns the PDF path actually written.</summary>
     Task<string> WriteAsync(DateOnly date, bool isFinal, DateTimeOffset generatedAt, CancellationToken cancellationToken);
 }
 
-/// <summary>Writes one dated PDF to the configured folder plus a JSON sidecar.</summary>
+/// <summary>Writes one dated PDF to the configured folder plus CSV and JSON sidecars.</summary>
 public sealed class AppUsageReportWriter : IDailyReportWriter
 {
     private static readonly JsonSerializerOptions JsonOptions = new()
@@ -54,9 +55,21 @@ public sealed class AppUsageReportWriter : IDailyReportWriter
         DailyAppUsageReport report = _reports.Create(date, generatedAt, isFinal);
 
         Directory.CreateDirectory(_jsonDirectory);
-        string jsonPath = Path.Combine(_jsonDirectory, $"{date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}.json");
+        string dateStamp = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        string jsonPath = Path.Combine(_jsonDirectory, $"{dateStamp}.json");
         await WriteAtomicallyAsync(jsonPath, Encoding.UTF8.GetBytes(JsonSerializer.Serialize(report, JsonOptions)), cancellationToken)
             .ConfigureAwait(false);
+
+        try
+        {
+            string csvPath = Path.Combine(_jsonDirectory, $"{dateStamp}.csv");
+            await WriteAtomicallyAsync(csvPath, Encoding.UTF8.GetBytes(BuildCsv(date, _reports.GetRawUsageRows(date))), cancellationToken)
+                .ConfigureAwait(false);
+        }
+        catch (Exception ex) when (ex is not OperationCanceledException)
+        {
+            _logger.LogWarning(ex, "Detailed CSV log for {Date} could not be written; PDF and JSON are unaffected.", date);
+        }
 
         byte[] pdf = _pdfWriter.Render(report);
         string pdfPath = GetDefaultPdfPath(date);
@@ -76,6 +89,27 @@ public sealed class AppUsageReportWriter : IDailyReportWriter
             await WriteAtomicallyAsync(fallback, pdf, cancellationToken).ConfigureAwait(false);
             return fallback;
         }
+    }
+
+    internal static string BuildCsv(DateOnly date, IReadOnlyList<AppTitleUsageRow> rows)
+    {
+        var sb = new StringBuilder("Date,ProcessName,DisplayName,Title,Seconds,FirstSeenUtc,LastSeenUtc,ItemCount\r\n");
+        string dateStamp = date.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+        foreach (AppTitleUsageRow row in rows)
+        {
+            sb.Append(dateStamp).Append(',').Append(CsvEscape(row.ProcessName)).Append(',')
+                .Append(CsvEscape(row.DisplayName ?? string.Empty)).Append(',').Append(CsvEscape(row.Title)).Append(',')
+                .Append(row.Seconds).Append(',').Append(row.FirstSeenUtc.ToString("o", CultureInfo.InvariantCulture)).Append(',')
+                .Append(row.LastSeenUtc.ToString("o", CultureInfo.InvariantCulture)).Append(',')
+                .Append(row.ItemCount).AppendLine();
+        }
+        return sb.ToString();
+    }
+
+    private static string CsvEscape(string value)
+    {
+        if (value.Length > 0 && value[0] is '=' or '+' or '-' or '@') value = "'" + value;
+        return value.IndexOfAny(new[] { ',', '"', '\n', '\r' }) < 0 ? value : $"\"{value.Replace("\"", "\"\"")}\"";
     }
 
     internal static string FallbackPath(string pdfPath, DateTimeOffset generatedAt)

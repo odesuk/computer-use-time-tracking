@@ -108,7 +108,7 @@ public sealed class SettingsWindow : Window
 
             content.Children.Add(Label("Local data retention"));
             content.Children.Add(Hint(
-                $"Raw activity is kept for {ClientSetupSettings.RawActivityRetentionLimitDays} days. Generated JSON sidecars are kept for {ClientSetupSettings.GeneratedJsonRetentionDays} days. PDF reports and matter summaries are not deleted.",
+                $"Raw activity is kept for {ClientSetupSettings.RawActivityRetentionLimitDays} days. Generated CSV and JSON sidecars are kept for {ClientSetupSettings.GeneratedJsonRetentionDays} days. PDF reports and matter summaries are not deleted.",
                 bottom: 16));
 
             _startAtSignIn = new CheckBox { Content = "Start when I sign in to Windows", FontWeight = FontWeights.SemiBold, IsEnabled = false };

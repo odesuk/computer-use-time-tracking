@@ -11,6 +11,11 @@ internal static class LocalStateReset
         {
             if (Directory.Exists(pdfReportDirectory))
             {
+                foreach (string path in Directory.EnumerateFiles(pdfReportDirectory, "tracker-*.log"))
+                {
+                    File.Delete(path);
+                }
+
                 foreach (string path in Directory.EnumerateFiles(pdfReportDirectory, "*.pdf"))
                 {
                     if (GeneratedReportFileName().IsMatch(Path.GetFileName(path))) File.Delete(path);

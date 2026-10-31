@@ -42,6 +42,18 @@ public sealed class AppUsageReportService : IActivityCalendar
             _repository.GetAppTitleUsage(start, end), options);
     }
 
+    /// <summary>Raw per-(process, title) rows for the detailed daily CSV.</summary>
+    public List<AppTitleUsageRow> GetRawUsageRows(DateOnly date)
+    {
+        (DateTime start, DateTime end) = LocalDay.ToUtcRange(date, _timeProvider.LocalTimeZone);
+        var excluded = new HashSet<string>(
+            _settings.Current.ExcludedProcessNames.Concat(AlwaysExcluded),
+            StringComparer.OrdinalIgnoreCase);
+        return _repository.GetAppTitleUsage(start, end)
+            .Where(row => row.Seconds > 0 && !excluded.Contains(row.ProcessName))
+            .ToList();
+    }
+
     public bool HasActivity(DateOnly date)
     {
         (DateTime start, DateTime end) = LocalDay.ToUtcRange(date, _timeProvider.LocalTimeZone);

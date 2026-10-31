@@ -81,7 +81,7 @@ The generated `.appinstaller` and MSIX are in `src\Windows\artifacts`. Publish b
 
 ## Local data and reports
 
-For the standalone app, data and logs are stored under `%LOCALAPPDATA%\ComputerUse-TimeTracking`. PDF reports are saved by default under `%USERPROFILE%\Documents\Computer Use Time Tracking Reports`. Settings let users choose a different report folder. Raw activity is retained for 60 days, generated JSON sidecars for 7 days, and PDFs remain until the user deletes them or resets local data.
+For the standalone app, data and logs are stored under `%LOCALAPPDATA%\ComputerUse-TimeTracking`. PDF reports are saved by default under `%USERPROFILE%\Documents\Computer Use Time Tracking Reports`. Settings let users choose a different report folder. Each report also produces a detailed daily CSV and JSON sidecar. Raw activity and generated sidecars are retained for 60 and 7 days respectively; PDFs remain until the user deletes them or resets local data.
 
 See [docs/architecture.md](docs/architecture.md) for repository ownership and downstream customization.
 

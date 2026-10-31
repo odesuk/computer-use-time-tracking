@@ -1,0 +1,4 @@
+#!/bin/sh
+# Internal QA build: the app is ad-hoc signed, so clear the download quarantine flag after install.
+xattr -dr com.apple.quarantine "/Applications/Computer Use Time Tracker.app" 2>/dev/null || true
+exit 0

@@ -5,7 +5,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <IsPackable>false</IsPackable>
     <IsTestProject>true</IsTestProject>
-    <AssemblyName>ComputerUse.TimeTracking.Core.Tests</AssemblyName>
+    <AssemblyName>ComputerUse.TimeTracking.Mac.Tests</AssemblyName>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,6 +18,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Core\ComputerUse.TimeTracking.Core.csproj" />
+    <ProjectReference Include="..\..\src\Mac\ComputerUse.TimeTracking.Mac.csproj" />
   </ItemGroup>
 </Project>

@@ -47,6 +47,10 @@ Testers: see [QA-INSTALL.md](QA-INSTALL.md) for step-by-step installation and wh
 
 ```sh
 ./installer/build-pkg.sh 1.0.0            # writes artifacts/Computer-Use-Time-Tracker-1.0.0-osx-arm64-QA.pkg
+cd artifacts
+zip -j Computer-Use-Time-Tracker-1.0.0-osx-arm64-QA.zip Computer-Use-Time-Tracker-1.0.0-osx-arm64-QA.pkg ../QA-INSTALL.md
 ```
+
+The zip holds the `.pkg` and `QA-INSTALL.md`, the two files QA needs. Send that zip to testers.
 
 The `.pkg` installs the app to `/Applications` and clears the download quarantine flag after install. It is not signed with a Developer ID Installer certificate, so the first open is blocked by Gatekeeper: testers right-click the `.pkg` and choose Open. Do not distribute it outside the team. Public distribution needs signing and notarization.

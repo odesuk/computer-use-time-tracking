@@ -1,6 +1,6 @@
 # Architecture and downstream use
 
-`Shared/Core` (at the repository root, used by both the Windows and Mac apps) is the platform-neutral tracking, SQLite, settings, retention, and reporting implementation. `src/Windows` adds Win32 activity sampling, Outlook providers, WPF settings, the tray host, startup registration, and Windows packaging behavior.
+`Shared/Core` (at the repository root, used by both the Windows and Mac apps) is the platform-neutral tracking, SQLite, settings, retention, and reporting implementation. The Windows app (this folder) adds Win32 activity sampling, Outlook providers, WPF settings, the tray host, startup registration, and Windows packaging behavior.
 
 The Windows host exposes one compile-time composition point: `TrackerApplication.Run` accepts a product identity and an optional service-registration delegate. The standalone entrypoint passes the checked-in local-only identity and no extra services. It does not scan directories, load plugins, or discover integrations from settings.
 

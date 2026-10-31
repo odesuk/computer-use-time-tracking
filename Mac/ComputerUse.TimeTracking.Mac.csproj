@@ -23,11 +23,13 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Compile Remove="tests/**;artifacts/**" />
+    <None Remove="tests/**;artifacts/**" />
     <EmbeddedResource Include="Assets\AppIcon.png" LogicalName="ComputerUse.TimeTracking.AppIcon.png" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\Shared\Core\ComputerUse.TimeTracking.Core.csproj" />
+    <ProjectReference Include="..\Shared\Core\ComputerUse.TimeTracking.Core.csproj" />
   </ItemGroup>
 
   <ItemGroup>

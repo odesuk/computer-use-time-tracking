@@ -49,7 +49,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $installer = $PSScriptRoot
-$project   = Join-Path (Split-Path $installer -Parent) 'src\Windows'
+$project   = Split-Path $installer -Parent
 $artifacts = Join-Path $project 'artifacts'
 $publish   = Join-Path $artifacts 'publish'
 $stage     = Join-Path $artifacts 'msix-stage'

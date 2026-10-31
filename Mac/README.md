@@ -32,12 +32,12 @@ open "artifacts/Computer Use Time Tracker.app"
 
 - Mail is tracked by window title. Outlook-specific subject and conversation matching from the Windows app is not ported yet.
 - Sleep is detected by the shared polling-gap check, not by a system notification.
-- The app icon is upscaled from the 128px Windows icon. A 1024px PNG at `src/Mac/Assets/AppIcon.png` would give a sharper icon.
+- The app icon is upscaled from the 128px Windows icon. A 1024px PNG at `Assets/AppIcon.png` would give a sharper icon.
 - Distributing to other Macs needs a Developer ID certificate and notarization. The ad-hoc build runs only on the Mac that built it.
 
 ## Layout
 
-- `src/Mac/`: the app (Avalonia menu bar UI, macOS sampler, native interop, host)
+- Root `*.cs`, `Native/`, `Providers/`, `UI/`, `Assets/`: the app (Avalonia menu bar UI, macOS sampler, native interop, host)
 - `tests/Mac.Tests/`: unit tests for argument parsing, the LaunchAgent plist, and the sampler
 - `installer/build-app.sh`: publish and bundle script (output in `artifacts/`)
 

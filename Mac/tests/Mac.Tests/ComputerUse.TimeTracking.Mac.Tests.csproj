@@ -16,8 +16,8 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-
   <ItemGroup>
-    <ProjectReference Include="..\..\src\Mac\ComputerUse.TimeTracking.Mac.csproj" />
+    <ProjectReference Include="..\..\ComputerUse.TimeTracking.Mac.csproj" />
   </ItemGroup>
+
 </Project>

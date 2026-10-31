@@ -1,6 +1,6 @@
 <Solution>
   <Project Path="../Shared/Core/ComputerUse.TimeTracking.Core.csproj" />
-  <Project Path="src/Windows/ComputerUse.TimeTracking.Windows.csproj" />
+  <Project Path="ComputerUse.TimeTracking.Windows.csproj" />
   <Project Path="../Shared/Core.Tests/ComputerUse.TimeTracking.Core.Tests.csproj" />
   <Project Path="tests/Windows.Tests/ComputerUse.TimeTracking.Windows.Tests.csproj" />
 </Solution>

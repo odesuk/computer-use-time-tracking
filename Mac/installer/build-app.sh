@@ -15,11 +15,11 @@ runtime="${2:-osx-arm64}"
 
 installer_dir="$(cd "$(dirname "$0")" && pwd)"
 mac_root="$(cd "$installer_dir/.." && pwd)"
-project="$mac_root/src/Mac/ComputerUse.TimeTracking.Mac.csproj"
+project="$mac_root/ComputerUse.TimeTracking.Mac.csproj"
 artifacts="$mac_root/artifacts"
 publish_dir="$artifacts/publish-$runtime"
 app="$artifacts/Computer Use Time Tracker.app"
-icon_source="$mac_root/src/Mac/Assets/AppIcon.png"
+icon_source="$mac_root/Assets/AppIcon.png"
 iconset="$artifacts/AppIcon.iconset"
 
 echo "Publishing $runtime build $version..."
@@ -32,7 +32,7 @@ mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources" "$iconset"
 cp -R "$publish_dir/." "$app/Contents/MacOS/"
 
 # The Windows .ico has no 1024px frame, so the largest sizes are upscaled from the 128px source. Supply a 1024px
-# master PNG at src/Mac/Assets/AppIcon.png to get a sharp icon.
+# master PNG at Assets/AppIcon.png to get a sharp icon.
 for size in 16 32 128 256; do
   sips -z "$size" "$size" "$icon_source" --out "$iconset/icon_${size}x${size}.png" >/dev/null
   sips -z "$((size * 2))" "$((size * 2))" "$icon_source" --out "$iconset/icon_${size}x${size}@2x.png" >/dev/null

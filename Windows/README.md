@@ -23,13 +23,13 @@ Clone or download this repository, open PowerShell in its root directory, and ru
 
 ```powershell
 dotnet restore .\ComputerUse.TimeTracking.slnx
-dotnet run --project .\src\Windows\ComputerUse.TimeTracking.Windows.csproj
+dotnet run --project .\ComputerUse.TimeTracking.Windows.csproj
 ```
 
 The app runs in the notification area and does not open a main window. Look in Windows' hidden-icons menu if you do not see the clock icon. Right-click it to open the menu. To open setup/settings directly:
 
 ```powershell
-dotnet run --project .\src\Windows\ComputerUse.TimeTracking.Windows.csproj -- --setup
+dotnet run --project .\ComputerUse.TimeTracking.Windows.csproj -- --setup
 ```
 
 To build the solution and run the automated tests:
@@ -65,7 +65,7 @@ The script publishes a self-contained `win-x64` app, stages the manifest and log
 
 This selects a matching certificate from `CurrentUser\My`; install and select the certificate according to your organization's signing policy. For a PFX-based or trusted signing service, pass the required `signtool.exe` arguments through `-SignToolArgs`. Protect signing credentials, never commit certificates or passwords to the repository, and store CI credentials in the CI platform's secret store. The script's default timestamp URL can be overridden with `-TimestampUrl` if your signing service requires a different timestamp server.
 
-The package is written to `src\Windows\artifacts\ComputerUse.TimeTracking_<version>_x64.msix`. If signing or packaging fails, check that the Windows SDK is installed and that `-Publisher` exactly matches the signing certificate subject. `-SkipSigning` is intended only for creating a package for inspection; Windows will not install that unsigned package as a trusted app.
+The package is written to `artifacts\ComputerUse.TimeTracking_<version>_x64.msix`. If signing or packaging fails, check that the Windows SDK is installed and that `-Publisher` exactly matches the signing certificate subject. `-SkipSigning` is intended only for creating a package for inspection; Windows will not install that unsigned package as a trusted app.
 
 To generate an `.appinstaller` file as well, provide an HTTPS feed URL where the package will be hosted:
 
@@ -77,7 +77,7 @@ To generate an `.appinstaller` file as well, provide an HTTPS feed URL where the
   -SignToolArgs @("/a", "/s", "My", "/n", "Your Publisher")
 ```
 
-The generated `.appinstaller` and MSIX are in `src\Windows\artifacts`. Publish both at the supplied HTTPS feed URL for App Installer to use. The signing certificate must remain trusted by users' PCs for installation and updates.
+The generated `.appinstaller` and MSIX are in `artifacts`. Publish both at the supplied HTTPS feed URL for App Installer to use. The signing certificate must remain trusted by users' PCs for installation and updates.
 
 ## Local data and reports
 

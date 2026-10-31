@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="ComputerUse.TimeTracking.Mac.csproj" />
+  <Project Path="tests/Mac.Tests/ComputerUse.TimeTracking.Mac.Tests.csproj" />
+</Solution>

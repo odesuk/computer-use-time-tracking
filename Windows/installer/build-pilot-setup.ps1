@@ -9,7 +9,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 $installer = $PSScriptRoot
 $project = Split-Path $installer -Parent
-$artifacts = Join-Path $project 'src\Windows\artifacts'
+$artifacts = Join-Path $project 'artifacts'
 $msixName = "ComputerUse.TimeTracking_${Version}_x64.msix"
 $msixPath = Join-Path $artifacts $msixName
 $output = Join-Path $artifacts "ComputerUse.TimeTracking_${Version}_Setup.exe"

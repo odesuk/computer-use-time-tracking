@@ -1,0 +1,39 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <!-- macOS menu bar app. Tracking, storage, and reporting come from the platform-neutral Core in Shared/Core. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <OutputType>WinExe</OutputType>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>ComputerUse.TimeTracking</RootNamespace>
+    <AssemblyName>ComputerUse.TimeTracking</AssemblyName>
+    <Version>1.0.0</Version>
+    <Product>Computer Use Time Tracker</Product>
+    <Company>Computer Use Time Tracking contributors</Company>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Avalonia" Version="12.1.4" />
+    <PackageReference Include="Avalonia.Desktop" Version="12.1.4" />
+    <PackageReference Include="Avalonia.Themes.Fluent" Version="12.1.4" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.13" />
+    <PackageReference Include="Serilog.Extensions.Hosting" Version="10.0.0" />
+    <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="tests/**;artifacts/**" />
+    <None Remove="tests/**;artifacts/**" />
+    <EmbeddedResource Include="Assets\AppIcon.png" LogicalName="ComputerUse.TimeTracking.AppIcon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Shared\Core\ComputerUse.TimeTracking.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <InternalsVisibleTo Include="ComputerUse.TimeTracking.Mac.Tests" />
+  </ItemGroup>
+
+</Project>
